@@ -3,7 +3,7 @@ services:
     name: cookthelefts
     env: python
     buildCommand: ./build.sh
-    startCommand: gunicorn "app:create_app('production')" --bind 0.0.0.0:$PORT
+    startCommand: gunicorn run:app --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
