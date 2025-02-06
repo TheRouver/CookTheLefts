@@ -39,7 +39,7 @@ A web application for sharing and discovering recipes.
 5. Add the following environment variables:
    - `FLASK_ENV`: production
    - `SECRET_KEY`: (will be auto-generated)
-   - `SPOONACULAR_API_KEY`: (your API key)
+   - `SPOONACULAR_API_KEY`: (required - get your API key from https://spoonacular.com/food-api)
 
 6. Click "Create Web Service"
 
