@@ -2,6 +2,21 @@
 
 A web application for sharing and discovering recipes.
 
+## System Requirements
+
+### Windows
+- Python 3.8 - 3.11 (getestet auf 3.8, 3.9, 3.10, 3.11)
+- Visual Studio Code
+- Git (optional, für Versionskontrolle)
+- Windows 10/11
+
+### macOS
+- Python 3.11
+- Xcode Command Line Tools
+- Visual Studio Code
+- Git (optional)
+- macOS 11 (Big Sur) oder höher
+
 ## Deployment to Render.com
 
 ### Prerequisites
