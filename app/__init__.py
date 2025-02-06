@@ -2,18 +2,19 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate
-from config import Config
+from config import config
 import os
 
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 
-def create_app():
+def create_app(config_name='default'):
     app = Flask(__name__)
     
-    app.config.from_object(Config)
-    Config.init_app(app)  # Initialize configuration and create directories
+    # Use the config dictionary to get the correct configuration class
+    app.config.from_object(config[config_name])
+    config[config_name].init_app(app)
 
     # Initialize extensions
     db.init_app(app)
@@ -28,14 +29,18 @@ def create_app():
     # Add debug logging for static files
     @app.before_request
     def log_request_info():
-        app.logger.debug('Headers: %s', request.headers)
-        app.logger.debug('Body: %s', request.get_data())
+        if app.debug:  # Only log in debug mode
+            app.logger.debug('Headers: %s', request.headers)
+            app.logger.debug('Body: %s', request.get_data())
 
     @app.after_request
     def add_header(response):
-        # Prevent caching of static files during development
-        if request.path.startswith('/static/'):
+        if app.debug and request.path.startswith('/static/'):
+            # Prevent caching of static files during development only
             response.headers['Cache-Control'] = 'no-store'
+        elif request.path.startswith('/static/'):
+            # Enable caching for static files in production
+            response.headers['Cache-Control'] = 'public, max-age=31536000'
         return response
 
     # Import and register blueprints

@@ -1,7 +1,8 @@
+import os
 from app import create_app, db
 from app.models import User, Recipe, Like
 
-app = create_app()
+app = create_app(os.getenv('FLASK_ENV', 'development'))
 
 @app.shell_context_processor
 def make_shell_context():
@@ -16,4 +17,4 @@ if __name__ == '__main__':
     with app.app_context():
         # Create database tables if they don't exist
         db.create_all()
-    app.run(debug=True)
+    app.run()
