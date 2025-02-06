@@ -18,4 +18,7 @@ python -m flask db upgrade || {
     exit 1
 }
 
+echo "Creating database tables..."
+python -c "from run import app; from app import db; app.app_context().push(); db.create_all()"
+
 echo "Build completed successfully!"
