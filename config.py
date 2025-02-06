@@ -6,7 +6,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config:
     # Security
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-secret-key'
-    SPOONACULAR_API_KEY = '299a5798e3c44048b4ea35754c0fb104'
+    SPOONACULAR_API_KEY = os.environ.get('SPOONACULAR_API_KEY')
     
     # Database
     SQLALCHEMY_TRACK_MODIFICATIONS = False
