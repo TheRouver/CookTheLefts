@@ -56,3 +56,6 @@ def create_app(config_name='default'):
     return app
 
 from app import models
+
+# Create a default app instance for Gunicorn
+app = create_app('production')
