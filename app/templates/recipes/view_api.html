@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                {% if recipe.image_url %}
+                <img src="{{ recipe.image_url }}" 
+                     class="card-img-top" alt="{{ recipe.title }}"
+                     style="max-height: 400px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h1 class="card-title mb-0">{{ recipe.title }}</h1>
+                    </div>
+
+                    <div class="recipe-meta text-muted mb-4">
+                        <small>
+                            <i class="bi bi-globe"></i> {{ recipe.area }} |
+                            <i class="bi bi-tag"></i> {{ recipe.category }}
+                            {% if recipe.tags %}
+                            | <i class="bi bi-tags"></i> 
+                            {% for tag in recipe.tags %}
+                                <span class="badge bg-secondary">{{ tag }}</span>
+                            {% endfor %}
+                            {% endif %}
+                        </small>
+                    </div>
+
+                    <h4>Zutaten</h4>
+                    <ul class="list-group mb-4">
+                        {% for ingredient in recipe.ingredients %}
+                            <li class="list-group-item">
+                                {{ ingredient.measure }} {{ ingredient.ingredient }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+
+                    <h4>Zubereitung</h4>
+                    <div class="instructions mb-4">
+                        {% for step in recipe.instructions %}
+                            <p>{{ step }}</p>
+                        {% endfor %}
+                    </div>
+
+                    {% if recipe.youtube_url %}
+                    <div class="mb-4">
+                        <h4>Video-Anleitung</h4>
+                        <div class="ratio ratio-16x9">
+                            <iframe src="{{ recipe.youtube_url.replace('watch?v=', 'embed/') }}" 
+                                    title="YouTube video" 
+                                    allowfullscreen></iframe>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if recipe.source %}
+            <div class="text-center mb-4">
+                <a href="{{ recipe.source }}" target="_blank" class="btn btn-outline-primary">
+                    <i class="bi bi-link-45deg"></i> Original Rezept
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Teilen</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary share-button" 
+                                data-share-url="{{ request.url }}"
+                                data-share-title="{{ recipe.title }}"
+                                data-share-text="Schau dir dieses leckere Rezept an!">
+                            <i class="bi bi-share"></i> Teilen
+                        </button>
+                        <a href="javascript:window.print()" class="btn btn-outline-secondary">
+                            <i class="bi bi-printer"></i> Drucken
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {% if recipe.tags %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Tags</h5>
+                </div>
+                <div class="card-body">
+                    {% for tag in recipe.tags %}
+                        <span class="badge bg-secondary me-1">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Share functionality
+    const shareButtons = document.querySelectorAll('.share-button');
+    shareButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            const shareData = {
+                title: button.dataset.shareTitle,
+                text: button.dataset.shareText,
+                url: button.dataset.shareUrl
+            };
+
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    // Fallback: Copy URL to clipboard
+                    await navigator.clipboard.writeText(shareData.url);
+                    alert('Link in die Zwischenablage kopiert!');
+                }
+            } catch (err) {
+                console.error('Error sharing:', err);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

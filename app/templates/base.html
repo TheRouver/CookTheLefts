@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if title %}{{ title }} - {% endif %}CookTheLefts</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        /* General Styles */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background-color: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 3rem 1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Search Container */
+        .search-container {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        #ingredients-tags .badge {
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #ingredients-tags .btn-close {
+            margin-left: 0.5rem;
+            font-size: 0.7rem;
+        }
+
+        /* Recipe Cards */
+        .card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .card-img-top {
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* Default Recipe Image */
+        .default-recipe-image {
+            height: 200px;
+            background: linear-gradient(45deg, #f8f9fa 25%, #e9ecef 25%, #e9ecef 50%, #f8f9fa 50%, #f8f9fa 75%, #e9ecef 75%, #e9ecef);
+            background-size: 20px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+        }
+
+        .default-recipe-image i {
+            font-size: 3rem;
+        }
+
+        /* Progress Bar */
+        .progress {
+            height: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            background-color: #28a745;
+            font-size: 0.9rem;
+            line-height: 1.5rem;
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            z-index: 1050;
+        }
+
+        .toast {
+            min-width: 250px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">CookTheLefts</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.index') }}">Home</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('recipes.create') }}">Rezept erstellen</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('recipes.my_recipes') }}">Meine Rezepte</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('recipes.my_interactions') }}">Meine Interaktionen</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.about') }}">Über uns</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <span class="nav-link">{{ current_user.username }}</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">Abmelden</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">Anmelden</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.register') }}">Registrieren</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer mt-5 py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">© 2025 CookTheLefts - 
+                <a href="{{ url_for('main.impressum') }}">Impressum</a>
+            </span>
+        </div>
+    </footer>
+
+    <!-- JavaScript Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Debug Console -->
+    <script>
+        // Override console methods to add timestamps
+        const originalConsole = { ...console };
+        console = {
+            ...console,
+            log: (...args) => {
+                originalConsole.log(new Date().toISOString(), ...args);
+            },
+            error: (...args) => {
+                originalConsole.error(new Date().toISOString(), ...args);
+            },
+            warn: (...args) => {
+                originalConsole.warn(new Date().toISOString(), ...args);
+            }
+        };
+
+        // Log page load
+        console.log('Page loaded');
+        
+        // Log all script loads
+        document.addEventListener('load', function(e) {
+            if (e.target.tagName === 'SCRIPT') {
+                console.log('Script loaded:', e.target.src);
+            }
+        }, true);
+
+        // Log all errors
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            console.error('Global error:', {
+                message: msg,
+                url: url,
+                line: lineNo,
+                column: columnNo,
+                error: error?.stack || error
+            });
+            return false;
+        };
+    </script>
+    
+    <!-- Application JavaScript -->
+    <script>
+        console.log('Initializing application JavaScript');
+        // Toast Notification Function
+        function showToast(message, type = 'success') {
+            let toastContainer = document.getElementById('toast-container');
+            if (!toastContainer) {
+                const container = document.createElement('div');
+                container.id = 'toast-container';
+                container.style.position = 'fixed';
+                container.style.bottom = '1rem';
+                container.style.right = '1rem';
+                container.style.zIndex = '1050';
+                document.body.appendChild(container);
+                toastContainer = container;
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type}`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" 
+                            data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            const bsToast = new bootstrap.Toast(toast, {
+                autohide: true,
+                delay: 3000
+            });
+            bsToast.show();
+
+            toast.addEventListener('hidden.bs.toast', function () {
+                toast.remove();
+            });
+        }
+
+        // Form Validation Helper
+        function validateForm(form) {
+            const requiredFields = form.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+
+                field.addEventListener('input', function() {
+                    if (this.value.trim()) {
+                        this.classList.remove('is-invalid');
+                    }
+                });
+            });
+
+            return isValid;
+        }
+
+        // Loading State Helper
+        function setLoadingState(button, isLoading) {
+            if (isLoading) {
+                button.disabled = true;
+                const originalText = button.innerHTML;
+                button.setAttribute('data-original-text', originalText);
+                button.innerHTML = `
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Lädt...
+                `;
+            } else {
+                button.disabled = false;
+                const originalText = button.getAttribute('data-original-text');
+                if (originalText) {
+                    button.innerHTML = originalText;
+                }
+            }
+        }
+
+        // Recipe Search Functionality
+        function initializeRecipeSearch() {
+            const ingredientsInput = document.getElementById('ingredients-input');
+            const addIngredientButton = document.getElementById('add-ingredient');
+            const searchButton = document.getElementById('search-button');
+            const ingredientsTags = document.getElementById('ingredients-tags');
+            const searchResults = document.getElementById('search-results');
+            const resultsContainer = document.getElementById('results-container');
+            let ingredients = new Set();
+
+            if (!ingredientsInput || !addIngredientButton || !searchButton || !ingredientsTags || !searchResults || !resultsContainer) {
+                console.error('Required elements not found');
+                return;
+            }
+
+            // Make ingredients available globally for the modal
+            window.ingredients = ingredients;
+
+            function addIngredient(ingredient) {
+                ingredient = ingredient.trim().toLowerCase();
+                if (!ingredient) {
+                    showToast('Please enter an ingredient', 'warning');
+                    return;
+                }
+                
+                // Basic validation
+                if (ingredient.length < 2) {
+                    showToast('Ingredient name is too short', 'warning');
+                    return;
+                }
+                
+                if (ingredients.has(ingredient)) {
+                    showToast('This ingredient is already added', 'warning');
+                    return;
+                }
+                
+                ingredients.add(ingredient);
+                updateTags();
+                ingredientsInput.value = '';
+                ingredientsInput.focus();
+            }
+
+            function removeIngredient(ingredient) {
+                ingredients.delete(ingredient);
+                updateTags();
+            }
+
+            function updateTags() {
+                ingredientsTags.innerHTML = Array.from(ingredients).map(ingredient => `
+                    <span class="badge bg-primary me-2 mb-2 p-2">
+                        ${ingredient}
+                        <button type="button" class="btn-close btn-close-white ms-2" 
+                                aria-label="Remove" onclick="removeIngredient('${ingredient}')"></button>
+                    </span>
+                `).join('');
+
+                searchButton.disabled = ingredients.size === 0;
+            }
+
+            // Handle form submission for adding ingredients
+            const form = document.getElementById('ingredients-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const input = document.getElementById('ingredients-input');
+                    const value = input ? input.value : '';
+                    
+                    if (value && value.trim()) {
+                        addIngredient(value);
+                    }
+                });
+            }
+
+            // Search button click handler
+            searchButton.addEventListener('click', async function() {
+                if (ingredients.size === 0) {
+                    showToast('Please add at least one ingredient', 'warning');
+                    return;
+                }
+
+                setLoadingState(searchButton, true);
+                searchResults.style.display = 'none';
+                
+                try {
+                    const searchUrl = `/search?ingredients=${Array.from(ingredients).join(',')}`;
+                    console.log('Searching with URL:', searchUrl);
+                    
+                    const response = await fetch(searchUrl);
+                    console.log('Search response status:', response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`Search request failed with status ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Search results:', data);
+                    
+                    if (data.error) {
+                        console.error('Search error:', data.error);
+                        showToast(data.error, 'danger');
+                        searchResults.style.display = 'none';
+                    } else {
+                        console.log('Displaying results:', {
+                            apiResults: data.api_results?.length || 0,
+                            userResults: data.user_results?.length || 0
+                        });
+                        displayResults(data);
+                    }
+                } catch (error) {
+                    console.error('Search error:', error);
+                    showToast('Failed to search recipes. Please try again.', 'danger');
+                    searchResults.style.display = 'none';
+                } finally {
+                    setLoadingState(searchButton, false);
+                    searchButton.disabled = ingredients.size === 0;
+                }
+            });
+
+            // Initialize search button state
+            searchButton.disabled = true;
+
+            // Make removeIngredient available globally
+            window.removeIngredient = removeIngredient;
+
+            // Display search results
+            function displayResults(data) {
+                // Handle API errors
+                if (data.error) {
+                    resultsContainer.innerHTML = `
+                        <div class="col-12 text-center">
+                            <p class="text-danger">
+                                <i class="bi bi-exclamation-triangle"></i> ${data.error}
+                            </p>
+                            <p class="text-muted">Please try again with different ingredients or contact support if the problem persists.</p>
+                        </div>
+                    `;
+                    searchResults.style.display = 'block';
+                    return;
+                }
+
+                // Handle no results
+                if ((!data.api_results || data.api_results.length === 0) && 
+                    (!data.user_results || data.user_results.length === 0)) {
+                    resultsContainer.innerHTML = `
+                        <div class="col-12 text-center">
+                            <p class="text-muted">
+                                <i class="bi bi-info-circle"></i> No recipes found with these ingredients.
+                            </p>
+                            <p>Suggestions:</p>
+                            <ul class="list-unstyled">
+                                <li>Try using fewer ingredients</li>
+                                <li>Check ingredient spelling</li>
+                                <li>Use more common ingredients</li>
+                            </ul>
+                        </div>
+                    `;
+                    searchResults.style.display = 'block';
+                    return;
+                }
+
+                let html = '';
+
+                // Display API results first
+                if (data.api_results && data.api_results.length > 0) {
+                    html += `
+                        <div class="col-12">
+                            <h3 class="mb-4">API Recipes</h3>
+                        </div>
+                        ${data.api_results.map(recipe => renderRecipeCard(recipe, true)).join('')}
+                    `;
+                }
+
+                // Display user results
+                if (data.user_results && data.user_results.length > 0) {
+                    html += `
+                        <div class="col-12">
+                            <h3 class="mt-4 mb-4">Community Recipes</h3>
+                        </div>
+                        ${data.user_results.map(recipe => renderRecipeCard(recipe, false)).join('')}
+                    `;
+                }
+
+                resultsContainer.innerHTML = html;
+                searchResults.style.display = 'block';
+                searchResults.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            // Render recipe card
+            function renderRecipeCard(recipe, isApiRecipe = true) {
+                const dietaryTags = [];
+                if (recipe.vegetarian) dietaryTags.push('<span class="badge bg-success me-1">Vegetarian</span>');
+                if (recipe.vegan) dietaryTags.push('<span class="badge bg-success me-1">Vegan</span>');
+                if (recipe.gluten_free) dietaryTags.push('<span class="badge bg-info me-1">Gluten-Free</span>');
+                if (recipe.dairy_free) dietaryTags.push('<span class="badge bg-info me-1">Dairy-Free</span>');
+
+                return `
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            ${recipe.image_url || recipe.image_path 
+                                ? `<img src="${isApiRecipe ? recipe.image_url : recipe.image_path}" 
+                                       class="card-img-top" alt="${recipe.title}" 
+                                       style="height: 200px; object-fit: cover;">`
+                                : `<div class="default-recipe-image">
+                                       <i class="bi bi-camera"></i>
+                                   </div>`
+                            }
+                            <div class="card-body">
+                                <h5 class="card-title">${recipe.title}</h5>
+                                <div class="progress mb-2">
+                                    <div class="progress-bar" role="progressbar" 
+                                         style="width: ${recipe.match_percentage}%">
+                                        ${Math.round(recipe.match_percentage)}% Match
+                                    </div>
+                                </div>
+                                ${isApiRecipe 
+                                    ? `<p class="card-text">
+                                           <small class="text-muted">
+                                               <i class="bi bi-globe"></i> ${recipe.area}<br>
+                                               <i class="bi bi-tag"></i> ${recipe.category}<br>
+                                               <i class="bi bi-clock"></i> ${recipe.ready_in_minutes} mins
+                                               <i class="bi bi-people"></i> ${recipe.servings} servings
+                                           </small>
+                                       </p>
+                                       <div class="dietary-tags mb-2">
+                                           ${dietaryTags.join('')}
+                                       </div>`
+                                    : `<p class="card-text">
+                                           <small class="text-muted">
+                                               <i class="bi bi-person"></i> ${recipe.author}<br>
+                                               <i class="bi bi-heart-fill text-danger"></i> ${recipe.likes_count} Likes
+                                           </small>
+                                       </p>`
+                                }
+                                <div class="ingredients mt-2">
+                                    <small class="text-success">
+                                        <i class="bi bi-check-circle"></i> Matching ingredients:<br>
+                                        ${recipe.matching_ingredients.join(', ')}
+                                    </small>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="text-danger">
+                                        <i class="bi bi-x-circle"></i> Missing ingredients:<br>
+                                        ${isApiRecipe 
+                                            ? recipe.ingredients
+                                                .filter(ing => !recipe.matching_ingredients
+                                                    .some(match => ing.ingredient.toLowerCase().includes(match)))
+                                                .map(ing => ing.ingredient)
+                                                .join(', ')
+                                            : recipe.missing_ingredients.join(', ')
+                                        }
+                                    </small>
+                                </div>
+                                <div class="mt-3">
+                                    ${isApiRecipe
+                                        ? `<button class="btn btn-outline-primary btn-sm view-recipe"
+                                                  data-recipe-id="${recipe.id}"
+                                                  data-recipe-source="api">
+                                               View Recipe
+                                           </button>
+                                           ${recipe.youtube_url 
+                                               ? `<a href="${recipe.youtube_url}" 
+                                                    target="_blank" 
+                                                    class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-youtube"></i> Video
+                                                  </a>` 
+                                               : ''}`
+                                        : `<a href="/recipes/${recipe.id}" 
+                                             class="btn btn-outline-primary btn-sm">
+                                             View Recipe
+                                          </a>`
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Handle recipe modal display
+        document.addEventListener('click', async function(e) {
+            if (e.target.classList.contains('view-recipe') || 
+                e.target.closest('.view-recipe')) {
+                const button = e.target.classList.contains('view-recipe') 
+                    ? e.target 
+                    : e.target.closest('.view-recipe');
+                const recipeId = button.dataset.recipeId;
+                const source = button.dataset.recipeSource;
+                
+                try {
+                    const response = await fetch(`/recipes/${recipeId}?source=${source}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch recipe');
+                    }
+                    
+                    const recipe = await response.json();
+                    const modal = document.getElementById('recipeModal');
+                    
+                    if (!modal) {
+                        console.error('Recipe modal not found');
+                        return;
+                    }
+
+                    const modalTitle = modal.querySelector('.modal-title');
+                    const modalBody = modal.querySelector('.modal-body');
+                    
+                    if (!modalTitle || !modalBody) {
+                        console.error('Modal elements not found');
+                        return;
+                    }
+
+                    modalTitle.textContent = recipe.title;
+                    
+                    modalBody.innerHTML = `
+                        ${recipe.image_url 
+                            ? `<img src="${recipe.image_url}" class="img-fluid mb-3" alt="${recipe.title}">`
+                            : `<div class="default-recipe-image mb-3">
+                                   <i class="bi bi-camera"></i>
+                               </div>`
+                        }
+                        
+                        <div class="recipe-meta mb-3">
+                            <span class="me-3"><i class="bi bi-clock"></i> ${recipe.ready_in_minutes} mins</span>
+                            <span><i class="bi bi-people"></i> ${recipe.servings} servings</span>
+                        </div>
+
+                        <h6>Ingredients:</h6>
+                        <ul class="mb-4">
+                            ${recipe.ingredients.map(ing => 
+                                `<li>${ing.measure} ${ing.ingredient}</li>`).join('')}
+                        </ul>
+
+                        <h6>Instructions:</h6>
+                        <ol class="instructions-list">
+                            ${Array.isArray(recipe.instructions) 
+                                ? recipe.instructions.map(step => `<li class="mb-2">${step}</li>`).join('')
+                                : `<li>${recipe.instructions}</li>`}
+                        </ol>
+                        ${recipe.source ? `<p><small>Source: <a href="${recipe.source}" 
+                                                               target="_blank">Original Recipe</a></small></p>` : ''}
+                    `;
+                    
+                    const bsModal = new bootstrap.Modal(modal);
+                    bsModal.show();
+                } catch (error) {
+                    console.error('Error fetching recipe:', error);
+                    showToast('Failed to load recipe details', 'danger');
+                }
+            }
+        });
+
+        // Initialize on DOM load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, checking dependencies...');
+            
+            // Check Bootstrap
+            if (typeof bootstrap === 'undefined') {
+                console.error('Bootstrap not loaded');
+                return;
+            }
+            console.log('Bootstrap loaded successfully');
+            
+            // Check required DOM elements
+            const requiredElements = {
+                'ingredients-input': document.getElementById('ingredients-input'),
+                'add-ingredient': document.getElementById('add-ingredient'),
+                'search-button': document.getElementById('search-button'),
+                'ingredients-tags': document.getElementById('ingredients-tags'),
+                'search-results': document.getElementById('search-results'),
+                'results-container': document.getElementById('results-container')
+            };
+            
+            for (const [name, element] of Object.entries(requiredElements)) {
+                if (!element) {
+                    console.error(`Required element not found: ${name}`);
+                }
+            }
+            
+            // Initialize recipe search
+            try {
+                console.log('Initializing recipe search...');
+                initializeRecipeSearch();
+                console.log('Recipe search initialized successfully');
+            } catch (error) {
+                console.error('Failed to initialize recipe search:', error);
+            }
+        });
+
+        // Log all form submissions
+        document.addEventListener('submit', function(e) {
+            console.log('Form submitted:', {
+                id: e.target.id,
+                action: e.target.action,
+                method: e.target.method
+            });
+        });
+
+        // Log all button clicks
+        document.addEventListener('click', function(e) {
+            if (e.target.tagName === 'BUTTON') {
+                console.log('Button clicked:', {
+                    id: e.target.id,
+                    text: e.target.textContent.trim(),
+                    type: e.target.type
+                });
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

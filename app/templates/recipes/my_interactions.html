@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">{{ title }}</h1>
+
+    <!-- Liked Recipes -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h2 class="h5 mb-0">
+                <i class="bi bi-heart-fill text-danger"></i> Gelikte Rezepte
+            </h2>
+        </div>
+        <div class="card-body">
+            {% if liked_recipes %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for recipe in liked_recipes %}
+                <div class="col">
+                    <div class="card h-100">
+                        {% if recipe.get_image_url() %}
+                        <img src="{{ recipe.get_image_url() }}" 
+                             class="card-img-top" 
+                             alt="{{ recipe.title }}"
+                             style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="default-recipe-image" style="height: 200px;">
+                            <i class="bi bi-camera"></i>
+                        </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ recipe.title }}</h5>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="bi bi-person"></i> {{ recipe.author.username }} |
+                                    <i class="bi bi-calendar"></i> {{ recipe.created_at.strftime('%d.%m.%Y') }}
+                                </small>
+                            </p>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('recipes.view', id=recipe.id) }}" 
+                                   class="btn btn-outline-primary">
+                                    Zum Rezept
+                                </a>
+                                {% if recipe.video_link %}
+                                <a href="{{ recipe.video_link }}" 
+                                   target="_blank"
+                                   class="btn btn-outline-danger">
+                                    <i class="bi bi-play-circle"></i> Video
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">Sie haben noch keine Rezepte geliked.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Rated Recipes -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="h5 mb-0">
+                <i class="bi bi-star-fill text-warning"></i> Bewertete Rezepte
+            </h2>
+        </div>
+        <div class="card-body">
+            {% if rated_recipes %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for recipe in rated_recipes %}
+                <div class="col">
+                    <div class="card h-100">
+                        {% if recipe.get_image_url() %}
+                        <img src="{{ recipe.get_image_url() }}" 
+                             class="card-img-top" 
+                             alt="{{ recipe.title }}"
+                             style="height: 200px; object-fit: cover;">
+                        {% else %}
+                        <div class="default-recipe-image" style="height: 200px;">
+                            <i class="bi bi-camera"></i>
+                        </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ recipe.title }}</h5>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    <i class="bi bi-person"></i> {{ recipe.author.username }} |
+                                    <i class="bi bi-calendar"></i> {{ recipe.created_at.strftime('%d.%m.%Y') }}
+                                </small>
+                            </p>
+                            {% set user_comment = recipe.comments.filter_by(user_id=current_user.id).first() %}
+                            {% if user_comment %}
+                            <div class="mb-2">
+                                <span class="badge bg-primary">Ihre Bewertung: {{ user_comment.rating }}/10</span>
+                            </div>
+                            {% endif %}
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('recipes.view', id=recipe.id) }}" 
+                                   class="btn btn-outline-primary">
+                                    Zum Rezept
+                                </a>
+                                {% if recipe.video_link %}
+                                <a href="{{ recipe.video_link }}" 
+                                   target="_blank"
+                                   class="btn btn-outline-danger">
+                                    <i class="bi bi-play-circle"></i> Video
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted">Sie haben noch keine Rezepte bewertet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

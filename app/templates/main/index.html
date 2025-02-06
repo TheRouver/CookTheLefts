@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section text-center py-5 mb-4">
+    <h1 class="display-4">Find Recipes with Your Ingredients</h1>
+    <p class="lead">Add your available ingredients and discover matching recipes!</p>
+    
+    <div class="search-container mx-auto" style="max-width: 600px;">
+        <form id="ingredients-form" class="mb-4">
+            <div class="input-group mb-3">
+                <input type="text" id="ingredients-input" class="form-control" 
+                       placeholder="Enter ingredient in English (e.g., potato)"
+                       list="common-ingredients"
+                       autocomplete="off">
+                <button class="btn btn-success" type="submit" id="add-ingredient">
+                    <i class="bi bi-plus-lg"></i> Add
+                </button>
+                <button class="btn btn-primary ms-2" type="button" id="search-button" disabled>
+                    <i class="bi bi-search"></i> Search
+                </button>
+            </div>
+            <div id="ingredients-tags" class="mb-3 text-start"></div>
+            <div class="form-text text-start">
+                <i class="bi bi-info-circle"></i> Please enter ingredients in English for better search results
+            </div>
+        </form>
+        <datalist id="common-ingredients">
+            <!-- Vegetables -->
+            <option value="potato">
+            <option value="onion">
+            <option value="tomato">
+            <option value="carrot">
+            <option value="garlic">
+            <option value="bell pepper">
+            <option value="broccoli">
+            <option value="spinach">
+            <option value="lettuce">
+            <option value="cucumber">
+            <option value="zucchini">
+            <option value="mushroom">
+            <option value="celery">
+            <option value="asparagus">
+            <option value="cauliflower">
+            <option value="eggplant">
+            <option value="peas">
+            <option value="corn">
+            <!-- Fruits -->
+            <option value="apple">
+            <option value="banana">
+            <option value="orange">
+            <option value="lemon">
+            <option value="lime">
+            <option value="strawberry">
+            <option value="blueberry">
+            <option value="raspberry">
+            <option value="pineapple">
+            <option value="mango">
+            <!-- Meats -->
+            <option value="chicken">
+            <option value="beef">
+            <option value="pork">
+            <option value="lamb">
+            <option value="turkey">
+            <option value="bacon">
+            <option value="ham">
+            <option value="sausage">
+            <!-- Fish & Seafood -->
+            <option value="salmon">
+            <option value="tuna">
+            <option value="shrimp">
+            <option value="cod">
+            <option value="tilapia">
+            <!-- Dairy & Eggs -->
+            <option value="milk">
+            <option value="cheese">
+            <option value="butter">
+            <option value="egg">
+            <option value="yogurt">
+            <option value="cream">
+            <option value="sour cream">
+            <!-- Grains & Pasta -->
+            <option value="rice">
+            <option value="pasta">
+            <option value="flour">
+            <option value="bread">
+            <option value="oats">
+            <option value="quinoa">
+            <option value="couscous">
+            <!-- Legumes & Nuts -->
+            <option value="beans">
+            <option value="lentils">
+            <option value="chickpeas">
+            <option value="peanuts">
+            <option value="almonds">
+            <option value="walnuts">
+            <!-- Herbs & Spices -->
+            <option value="basil">
+            <option value="oregano">
+            <option value="thyme">
+            <option value="rosemary">
+            <option value="cinnamon">
+            <option value="cumin">
+            <option value="paprika">
+            <option value="ginger">
+            <!-- Condiments -->
+            <option value="olive oil">
+            <option value="vinegar">
+            <option value="soy sauce">
+            <option value="mustard">
+            <option value="mayonnaise">
+            <option value="ketchup">
+            <option value="honey">
+            <!-- Others -->
+            <option value="sugar">
+            <option value="chocolate">
+            <option value="coconut">
+            <option value="tofu">
+            <option value="wine">
+            <option value="stock">
+        </datalist>
+    </div>
+</div>
+
+<div id="search-results" class="mb-4" style="display: none;">
+    <h2>Found Recipes</h2>
+    <div class="row" id="results-container"></div>
+</div>
+
+<!-- API Recipes Section -->
+<div class="recipes-section mb-4">
+    <h2>Recipe Suggestions</h2>
+    <div class="row">
+        {% for recipe in api_recipes %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if recipe.image_url %}
+                <img src="{{ recipe.image_url }}" 
+                     class="card-img-top" alt="{{ recipe.title }}"
+                     style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="default-recipe-image">
+                    <i class="bi bi-camera"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ recipe.title }}</h5>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="bi bi-globe"></i> {{ recipe.area }}<br>
+                            <i class="bi bi-tag"></i> {{ recipe.category }}
+                        </small>
+                    </p>
+                    <div class="ingredients-preview">
+                        <small class="text-muted">Ingredients:</small><br>
+                        <small>
+                            {% for ingredient in recipe.ingredients[:3] %}
+                            {{ ingredient.measure }} {{ ingredient.ingredient }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                            {% if recipe.ingredients|length > 3 %}...{% endif %}
+                        </small>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-outline-primary btn-sm view-recipe" 
+                                data-recipe-id="{{ recipe.id }}"
+                                data-recipe-source="api">
+                            View Recipe
+                        </button>
+                        {% if recipe.youtube_url %}
+                        <a href="{{ recipe.youtube_url }}" target="_blank" 
+                           class="btn btn-outline-danger btn-sm">
+                            <i class="bi bi-youtube"></i> Video
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- User Recipes Section -->
+{% if user_recipes %}
+<div class="recipes-section mb-4">
+    <h2>Community Recipes</h2>
+    <div class="row">
+        {% for recipe in user_recipes %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if recipe.get_image_url() %}
+                <img src="{{ recipe.get_image_url() }}" 
+                     class="card-img-top" alt="{{ recipe.title }}"
+                     style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="default-recipe-image">
+                    <i class="bi bi-camera"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ recipe.title }}</h5>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="bi bi-person"></i> {{ recipe.author.username }}<br>
+                            <i class="bi bi-heart-fill text-danger"></i> {{ recipe.likes.count() }} Likes
+                            <br>
+                            <i class="bi bi-clock"></i> {{ recipe.created_at.strftime('%Y-%m-%d') }}
+                        </small>
+                    </p>
+                    <div class="mt-3">
+                        <a href="{{ url_for('recipes.view', id=recipe.id) }}" 
+                           class="btn btn-outline-primary">View Recipe</a>
+                        {% if recipe.video_link %}
+                        <a href="{{ recipe.video_link }}" 
+                           target="_blank" 
+                           class="btn btn-outline-danger">
+                            <i class="bi bi-play-circle"></i> Video
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<!-- Recipe Modal -->
+<div class="modal fade" id="recipeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

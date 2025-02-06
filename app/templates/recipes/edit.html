@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Rezept bearbeiten</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.title.label(class="form-label") }}
+                        {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else "")) }}
+                        {% for error in form.title.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.ingredients.label(class="form-label") }}
+                        {{ form.ingredients(class="form-control" + (" is-invalid" if form.ingredients.errors else ""), rows="8") }}
+                        {% for error in form.ingredients.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-text">
+                            Geben Sie jede Zutat in einer neuen Zeile ein, z.B.:<br>
+                            200g Mehl<br>
+                            2 Eier<br>
+                            1 TL Salz
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.instructions.label(class="form-label") }}
+                        {{ form.instructions(class="form-control" + (" is-invalid" if form.instructions.errors else ""), rows="10") }}
+                        {% for error in form.instructions.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-text">
+                            Beschreiben Sie die Zubereitung Schritt für Schritt.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {% if recipe.image_path %}
+                        <div class="mb-3">
+                            <label class="form-label">Aktuelles Bild:</label>
+                            <img src="{{ url_for('static', filename=recipe.image_path) }}" 
+                                 alt="Aktuelles Rezeptbild" 
+                                 class="img-fluid mb-2" 
+                                 style="max-height: 300px;">
+                        </div>
+                        {% endif %}
+
+                        {{ form.image.label(class="form-label") }}
+                        {{ form.image(class="form-control" + (" is-invalid" if form.image.errors else "")) }}
+                        {% for error in form.image.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-text">
+                            Erlaubte Formate: JPG, JPEG, PNG, GIF<br>
+                            Lassen Sie dieses Feld leer, wenn Sie das aktuelle Bild behalten möchten.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div id="image-preview" class="mt-2" style="display: none;">
+                            <label class="form-label">Neue Bildvorschau:</label>
+                            <img id="preview-img" src="" alt="Vorschau" 
+                                 class="img-fluid" style="max-height: 300px;">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.video_link.label(class="form-label") }}
+                        {{ form.video_link(class="form-control" + (" is-invalid" if form.video_link.errors else "")) }}
+                        {% for error in form.video_link.errors %}
+                            <div class="invalid-feedback">{{ error }}</div>
+                        {% endfor %}
+                        <div class="form-text">
+                            Optional: Fügen Sie einen Link zu einem Video-Tutorial hinzu (z.B. YouTube)
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {{ form.submit(class="btn btn-primary", value="Änderungen speichern") }}
+                        <a href="{{ url_for('recipes.view', id=recipe.id) }}" class="btn btn-secondary">Abbrechen</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const imageInput = document.querySelector('input[type="file"]');
+    const imagePreview = document.getElementById('image-preview');
+    const previewImg = document.getElementById('preview-img');
+
+    imageInput.addEventListener('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                imagePreview.style.display = 'block';
+            }
+            reader.readAsDataURL(file);
+        } else {
+            imagePreview.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

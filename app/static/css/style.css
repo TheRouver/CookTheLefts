@@ -1,0 +1,224 @@
+/* General Styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Hero Section */
+.hero-section {
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 3rem 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Search Container */
+.search-container {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#ingredients-tags .badge {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+#ingredients-tags .btn-close {
+    margin-left: 0.5rem;
+    font-size: 0.7rem;
+}
+
+/* Recipe Cards */
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.card-img-top {
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Default Recipe Image */
+.default-recipe-image {
+    height: 200px;
+    background: linear-gradient(45deg, #f8f9fa 25%, #e9ecef 25%, #e9ecef 50%, #f8f9fa 50%, #f8f9fa 75%, #e9ecef 75%, #e9ecef);
+    background-size: 20px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+}
+
+.default-recipe-image i {
+    font-size: 3rem;
+}
+
+/* Like Button Animation */
+.like-button {
+    transition: transform 0.2s;
+}
+
+.like-button:active {
+    transform: scale(0.95);
+}
+
+.like-button .bi-heart-fill {
+    color: #dc3545;
+}
+
+/* Recipe Instructions */
+.instructions p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+/* Form Styles */
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+/* Progress Bar */
+.progress {
+    height: 1.5rem;
+    margin: 1rem 0;
+}
+
+.progress-bar {
+    background-color: #28a745;
+    font-size: 0.9rem;
+    line-height: 1.5rem;
+}
+
+/* Footer */
+.footer {
+    margin-top: auto;
+    background-color: #f8f9fa;
+    padding: 1rem 0;
+}
+
+/* Ingredient Tags */
+.ingredient-tag {
+    display: inline-flex;
+    align-items: center;
+    background-color: #007bff;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    margin: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.ingredient-tag .remove-tag {
+    margin-left: 0.5rem;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.ingredient-tag .remove-tag:hover {
+    opacity: 1;
+}
+
+/* Search Results */
+.match-percentage {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(40, 167, 69, 0.9);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+}
+
+/* Loading Animation */
+.loading {
+    display: inline-block;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 3px solid rgba(0,0,0,0.1);
+    border-radius: 50%;
+    border-top-color: #007bff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Toast Notifications */
+.toast {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    min-width: 250px;
+    z-index: 1050;
+}
+
+/* Image Preview */
+#image-preview {
+    max-width: 100%;
+    margin-top: 1rem;
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+
+#preview-img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 2rem 1rem;
+    }
+
+    .card-deck {
+        margin-right: 0;
+        margin-left: 0;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+
+    .ingredient-tag {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

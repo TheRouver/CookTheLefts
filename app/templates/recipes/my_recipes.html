@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>My Recipes</h2>
+        <a href="{{ url_for('recipes.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus-lg"></i> New Recipe
+        </a>
+    </div>
+
+    {% if recipes.items %}
+    <div class="row">
+        {% for recipe in recipes.items %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if recipe.get_image_url() %}
+                <img src="{{ recipe.get_image_url() }}" 
+                     class="card-img-top" alt="{{ recipe.title }}"
+                     style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="default-recipe-image">
+                    <i class="bi bi-camera"></i>
+                </div>
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ recipe.title }}</h5>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="bi bi-calendar"></i> {{ recipe.created_at.strftime('%d.%m.%Y') }}<br>
+                            <i class="bi bi-heart-fill text-danger"></i> {{ recipe.likes.count() }} Likes
+                        </small>
+                    </p>
+                    <div class="ingredients-preview mb-3">
+                        <small class="text-muted">
+                            {{ recipe.ingredients.split('\n')|length }} ingredients
+                        </small>
+                    </div>
+                    <div class="btn-group w-100">
+                        <a href="{{ url_for('recipes.view', id=recipe.id) }}" 
+                           class="btn btn-outline-primary">
+                            <i class="bi bi-eye"></i> View
+                        </a>
+                        <a href="{{ url_for('recipes.edit', id=recipe.id) }}" 
+                           class="btn btn-outline-secondary">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
+                        <button type="button" class="btn btn-outline-danger" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#deleteModal{{ recipe.id }}">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal for each recipe -->
+        <div class="modal fade" id="deleteModal{{ recipe.id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Delete Recipe</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete "{{ recipe.title }}"?</p>
+                        <p class="text-danger"><strong>This action cannot be undone.</strong></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <form action="{{ url_for('recipes.delete', id=recipe.id) }}" 
+                              method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if recipes.pages > 1 %}
+    <nav aria-label="Recipe pagination">
+        <ul class="pagination justify-content-center">
+            {% if recipes.has_prev %}
+            <li class="page-item">
+                <a class="page-link" 
+                   href="{{ url_for('recipes.my_recipes', page=recipes.prev_num) }}">
+                    Previous
+                </a>
+            </li>
+            {% endif %}
+
+            {% for page_num in recipes.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+                {% if page_num %}
+                    {% if page_num == recipes.page %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="{{ url_for('recipes.my_recipes', page=page_num) }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if recipes.has_next %}
+            <li class="page-item">
+                <a class="page-link" 
+                   href="{{ url_for('recipes.my_recipes', page=recipes.next_num) }}">
+                    Next
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-5">
+        <div class="default-recipe-image mb-4" style="max-width: 300px; margin: 0 auto;">
+            <i class="bi bi-journal-plus"></i>
+        </div>
+        <h3>No Recipes Found</h3>
+        <p class="text-muted">You haven't created any recipes yet.</p>
+        <a href="{{ url_for('recipes.create') }}" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-lg"></i> Create Your First Recipe
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
