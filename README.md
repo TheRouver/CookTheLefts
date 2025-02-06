@@ -8,7 +8,6 @@ CookTheLefts ist eine Flask-basierte Webanwendung, die es Benutzern ermöglicht,
 - Python 3.8 - 3.11 (getestet auf 3.8, 3.9, 3.10, 3.11)
 - Visual Studio Code
 - Git (optional, für Versionskontrolle)
-- 500 MB freier Speicherplatz
 - Windows 10/11
 
 ### macOS
@@ -16,7 +15,6 @@ CookTheLefts ist eine Flask-basierte Webanwendung, die es Benutzern ermöglicht,
 - Xcode Command Line Tools
 - Visual Studio Code
 - Git (optional)
-- 500 MB freier Speicherplatz
 - macOS 11 (Big Sur) oder höher
 
 ### Linux
